@@ -1,0 +1,144 @@
+<!--
+  Wheel spins using browser focus
+
+  Best in Debug Mode or Full Page View
+  - Click "Change View" button
+  - Use tab and shift-tab to rotate
+  - Also responds to click focus
+
+  - TODO
+  - Make spoke count dynamic
+-->
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: sans-serif;
+  background-color: black;
+  margin: 0;
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  align-items: center;
+}
+footer {
+  position: fixed;
+  color: rgba(255, 255, 255, .25);
+  bottom: 0;
+  font-size: 9px;
+  padding: 20px;
+}
+.container {
+  flex-grow: 1;
+}
+.scene {
+  position: relative;
+  width: 800px;
+  height: 200px;
+  margin: 0 auto;
+  perspective: 1000px;
+  color: #eee;
+}
+.wheel {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  transform: translateZ(-288px);
+  transform-style: preserve-3d;
+  transition: transform 500ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+.spoke {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  line-height: 200px;
+  font-size: 44px;
+  text-align: center;
+  transition: opacity 500ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+.spoke:focus {
+  outline: 0;
+}
+.spoke:nth-child(1) { transform: rotateX(  0deg) translateZ(288px); }
+.spoke:nth-child(2) { transform: rotateX( 40deg) translateZ(288px); }
+.spoke:nth-child(3) { transform: rotateX( 80deg) translateZ(288px); }
+.spoke:nth-child(4) { transform: rotateX(120deg) translateZ(288px); }
+.spoke:nth-child(5) { transform: rotateX(160deg) translateZ(288px); }
+.spoke:nth-child(6) { transform: rotateX(200deg) translateZ(288px); }
+.spoke:nth-child(7) { transform: rotateX(240deg) translateZ(288px); }
+.spoke:nth-child(8) { transform: rotateX(280deg) translateZ(288px); }
+.spoke:nth-child(9) { transform: rotateX(320deg) translateZ(288px); }
+</style>
+
+<footer>
+  <h1>Lyric Wheel</h1>
+  <p>Uses browser focus</p>
+  <p>Tab & shift-tab or click to spin</p>
+</footer>
+
+<div class="container">
+  <div class="scene">
+    <div class="wheel">
+      <div class="spoke" tabindex=0>How does it feel</div>
+      <div class="spoke" tabindex=0>To treat me like you do?</div>
+      <div class="spoke" tabindex=0>When you've laid your hands upon me</div>
+      <div class="spoke" tabindex=0>And told me who you are?</div>
+      <div class="spoke" tabindex=0>Thought I was mistaken</div>
+      <div class="spoke" tabindex=0>I thought I heard your words</div>
+      <div class="spoke" tabindex=0>Tell me, how do I feel?</div>
+      <div class="spoke" tabindex=0>Tell me now, how do I feel?</div>
+      <div class="spoke" tabindex=0>♫♫♫♫ ♫♪♪</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const wheel = document.querySelector('.wheel');
+const spokes = Array.from(document.querySelectorAll('.spoke'));
+const spokeCount = 9;
+let rotationPosition = 0;
+
+updateSpokeOpacities();
+focusFirstSpoke();
+
+wheel.addEventListener('focusin', evt => {
+  const prevIdx = rotationPosition % spokeCount;
+  const nextIdx = spokes.indexOf(evt.target);
+
+  if (!evt.target.matches('.spoke') || prevIdx === nextIdx) return;
+  const dist = getShortestDistance(prevIdx, nextIdx, spokeCount);
+
+  rotationPosition += dist;
+  rotateWheel();
+
+  //console.log(prevIdx, nextIdx, spokeCount, dist, rotationPosition);
+});
+
+function focusFirstSpoke() {
+  spokes[0].focus();
+}
+
+function getShortestDistance(prevIdx, nextIdx, length) {
+  const clockwise = (length - prevIdx + nextIdx) % length;
+  const counterClockwise = clockwise - length;
+  return clockwise <= Math.abs(counterClockwise) ? clockwise : counterClockwise;
+}
+
+function getAngle(pos, length) {
+  return pos / length * -360;
+}
+
+function updateSpokeOpacities() {
+  spokes.forEach((spoke, idx) => {
+    const spokeAngle = getAngle(idx - rotationPosition, spokeCount);
+    const opacity = Math.abs((180 - Math.abs(spokeAngle % 360)) / 180);
+    spoke.style.opacity = `${opacity}`;
+  });
+}
+
+function rotateWheel() {
+  const angle = getAngle(rotationPosition, spokeCount);
+
+  updateSpokeOpacities();
+  wheel.style.transform = `translateZ(-288px) rotateX(${angle}deg)`;
+}
+</script>

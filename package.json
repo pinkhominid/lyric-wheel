@@ -1,0 +1,12 @@
+{
+  "name": "lyric-wheel",
+  "version": "0.0.0",
+  "scripts": {
+    "start": "http-server -o"
+  },
+  "author": "pinkhominid <pinkhominid@birdbomb.com>",
+  "license": "ISC",
+  "devDependencies": {
+    "http-server": "^0.11.1"
+  }
+}
